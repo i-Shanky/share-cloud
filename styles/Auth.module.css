@@ -1,0 +1,172 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.logo {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.logo p {
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.content {
+  padding: 2rem;
+}
+
+.content h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.subtitle {
+  color: #666;
+  margin: 0 0 2rem 0;
+}
+
+.providers {
+  margin-bottom: 2rem;
+}
+
+.signInButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: #2f2f2f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signInButton:hover {
+  background: #1f1f1f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.features {
+  border-top: 1px solid #eee;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.featureIcon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.feature h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.feature p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.footer {
+  text-align: center;
+  padding: 2rem;
+  color: white;
+  opacity: 0.9;
+}
+
+.footer p {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 1rem;
+  }
+
+  .card {
+    border-radius: 12px;
+  }
+
+  .logo h1 {
+    font-size: 2rem;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
+
+  .content h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #2a2a2a;
+  }
+
+  .content h2,
+  .feature h3 {
+    color: #e0e0e0;
+  }
+
+  .subtitle,
+  .feature p {
+    color: #999;
+  }
+
+  .features {
+    border-color: #444;
+  }
+}

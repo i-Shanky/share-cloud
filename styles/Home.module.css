@@ -359,3 +359,133 @@
     border-color: #444;
   }
 }
+
+/* Auth & Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.signOutBtn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.signOutBtn:hover {
+  background: #d32f2f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.welcomeCard {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.welcomeSubtitle {
+  color: #666;
+  font-size: 1.2rem;
+  margin: 1rem 0 2rem 0;
+}
+
+.signInBtn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signInBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Success Message */
+.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #a5d6a7;
+  text-align: center;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: #667eea;
+  background: #f5f5f5;
+}
+
+.activeTab {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+/* Trash Card Styles */
+.trashCard {
+  border: 1px solid #ffccbc;
+  background: #fff3e0;
+}
+
+.trashCard:hover {
+  border-color: #ff9800;
+  background: #ffe0b2;
+}
+
+.trashExpiry {
+  font-size: 0.8rem;
+  color: #f57c00;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.dangerButton {
+  background: #ffebee;
+  border-color: #ef9a9a;
+}
+
+.dangerButton:hover {
+  background: #f44336;
+  border-color: #f44336;
+  color: white;
+}
+

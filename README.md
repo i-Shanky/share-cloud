@@ -4,12 +4,22 @@ A modern, Google Drive-like file storage application built with Next.js and Azur
 
 ## Features
 
+### Core Functionality
 - **Drag & Drop Upload**: Intuitive file upload with drag-and-drop support
-- **File Management**: List, download, and delete files easily
+- **File Management**: List, download, and manage files easily
 - **Modern UI**: Clean, responsive interface inspired by Google Drive
 - **Azure-Powered**: Leverages Azure Blob Storage for reliable cloud storage
 - **Multiple File Types**: Support for images, videos, documents, and more
 - **Dark Mode**: Automatic dark mode based on system preferences
+
+### Advanced Features ⭐
+- **Azure AD Authentication**: Secure sign-in with Microsoft accounts
+- **Managed Identity**: Enhanced security without storage account keys
+- **Trash & Recovery**: 30-day trash bin with file restoration
+- **User Isolation**: User-specific file storage and access control
+- **Enterprise Security**: MFA support, conditional access, SSO ready
+
+👉 **See [FEATURES.md](FEATURES.md) for detailed documentation on advanced features**
 
 ## Prerequisites
 
