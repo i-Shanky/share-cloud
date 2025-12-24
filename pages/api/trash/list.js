@@ -1,8 +1,8 @@
-import { moveToTrash } from '../../../lib/azureStorage';
+import { listTrash } from '../../../lib/azureStorage';
 import { requireAuth, getUserId } from '../../../lib/auth';
 
 export default async function handler(req, res) {
-  if (req.method !== 'DELETE') {
+  if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -11,19 +11,14 @@ export default async function handler(req, res) {
   if (!session) return;
 
   const userId = getUserId(session);
-  const { name } = req.query;
-
-  if (!name) {
-    return res.status(400).json({ error: 'File name is required' });
-  }
 
   try {
-    const result = await moveToTrash(userId, name);
-    res.status(200).json({ success: true, ...result });
+    const files = await listTrash(userId);
+    res.status(200).json({ success: true, files });
   } catch (error) {
-    console.error('Delete error:', error);
+    console.error('List trash error:', error);
     res.status(500).json({
-      error: 'Failed to move file to trash',
+      error: 'Failed to list trash from Azure Storage',
       details: error.message
     });
   }

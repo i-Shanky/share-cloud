@@ -1,6 +1,7 @@
 import formidable from 'formidable';
 import fs from 'fs';
 import { uploadFile } from '../../../lib/azureStorage';
+import { requireAuth, getUserId } from '../../../lib/auth';
 
 // Disable Next.js body parser to handle file uploads
 export const config = {
@@ -13,6 +14,12 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Check authentication
+  const session = await requireAuth(req, res);
+  if (!session) return;
+
+  const userId = getUserId(session);
 
   try {
     const form = formidable({
@@ -36,8 +43,9 @@ export default async function handler(req, res) {
           // Read file buffer
           const fileBuffer = fs.readFileSync(file.filepath);
 
-          // Upload to Azure
+          // Upload to Azure with userId
           const result = await uploadFile(
+            userId,
             file.originalFilename || file.newFilename,
             fileBuffer,
             file.mimetype || 'application/octet-stream'
@@ -55,7 +63,10 @@ export default async function handler(req, res) {
         });
       } catch (uploadError) {
         console.error('Upload error:', uploadError);
-        res.status(500).json({ error: 'Failed to upload files to Azure Storage' });
+        res.status(500).json({
+          error: 'Failed to upload files to Azure Storage',
+          details: uploadError.message
+        });
       }
     });
   } catch (error) {

@@ -1,4 +1,4 @@
-import { moveToTrash } from '../../../lib/azureStorage';
+import { permanentDelete } from '../../../lib/azureStorage';
 import { requireAuth, getUserId } from '../../../lib/auth';
 
 export default async function handler(req, res) {
@@ -11,19 +11,19 @@ export default async function handler(req, res) {
   if (!session) return;
 
   const userId = getUserId(session);
-  const { name } = req.query;
+  const { path } = req.query;
 
-  if (!name) {
-    return res.status(400).json({ error: 'File name is required' });
+  if (!path) {
+    return res.status(400).json({ error: 'File path is required' });
   }
 
   try {
-    const result = await moveToTrash(userId, name);
+    const result = await permanentDelete(userId, path);
     res.status(200).json({ success: true, ...result });
   } catch (error) {
-    console.error('Delete error:', error);
+    console.error('Permanent delete error:', error);
     res.status(500).json({
-      error: 'Failed to move file to trash',
+      error: 'Failed to permanently delete file',
       details: error.message
     });
   }
