@@ -1,0 +1,87 @@
+name: CI - Build and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npm run lint
+      continue-on-error: true
+
+    - name: Build application
+      run: npm run build
+      env:
+        AZURE_STORAGE_ACCOUNT_NAME: dummy-account
+        AZURE_STORAGE_ACCOUNT_KEY: dummy-key
+        AZURE_STORAGE_CONTAINER_NAME: files
+
+    - name: Check build artifacts
+      run: |
+        if [ ! -d ".next" ]; then
+          echo "Build failed - .next directory not found"
+          exit 1
+        fi
+        echo "Build successful!"
+
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: sharecloud-app:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Test Docker image
+      run: |
+        docker run -d -p 3000:3000 \
+          -e AZURE_STORAGE_ACCOUNT_NAME=dummy \
+          -e AZURE_STORAGE_ACCOUNT_KEY=dummy \
+          -e AZURE_STORAGE_CONTAINER_NAME=files \
+          --name sharecloud-test \
+          sharecloud-app:test
+
+        # Wait for container to start
+        sleep 10
+
+        # Check if container is running
+        if [ "$(docker ps -q -f name=sharecloud-test)" ]; then
+          echo "Container is running successfully"
+          docker stop sharecloud-test
+          exit 0
+        else
+          echo "Container failed to start"
+          docker logs sharecloud-test
+          exit 1
+        fi
