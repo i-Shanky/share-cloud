@@ -1,34 +1,276 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ShareCloud - Azure File Storage App
 
-## Getting Started
+A modern, Google Drive-like file storage application built with Next.js and Azure Blob Storage. Upload, manage, and share files seamlessly using Microsoft Azure's cloud infrastructure.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
+- **Drag & Drop Upload**: Intuitive file upload with drag-and-drop support
+- **File Management**: List, download, and delete files easily
+- **Modern UI**: Clean, responsive interface inspired by Google Drive
+- **Azure-Powered**: Leverages Azure Blob Storage for reliable cloud storage
+- **Multiple File Types**: Support for images, videos, documents, and more
+- **Dark Mode**: Automatic dark mode based on system preferences
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+1. **Node.js** (version 14 or higher)
+2. **An Azure Account** with an active subscription
+3. **Azure Storage Account** created in your Azure Portal
+
+## Azure Setup
+
+### Step 1: Create an Azure Storage Account
+
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Click "Create a resource" → Search for "Storage account"
+3. Fill in the required details:
+   - **Subscription**: Choose your subscription
+   - **Resource Group**: Create new or use existing
+   - **Storage account name**: Choose a unique name (e.g., `sharecloud123`)
+   - **Region**: Select your preferred region
+   - **Performance**: Standard
+   - **Redundancy**: LRS (Locally-redundant storage) for development
+4. Click "Review + Create" → "Create"
+
+### Step 2: Get Your Storage Credentials
+
+1. Navigate to your Storage Account in Azure Portal
+2. Go to "Security + networking" → "Access keys"
+3. Copy the following values:
+   - **Storage account name**: Your account name
+   - **Key**: Key1 or Key2 (either will work)
+
+### Step 3: Configure Container (Optional)
+
+The application automatically creates a container named "files" if it doesn't exist. You can customize this in the `.env.local` file.
+
+## Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone <your-repo-url>
+   cd share-cloud
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**:
+
+   Copy `.env.example` to `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Edit `.env.local` and add your Azure credentials:
+   ```env
+   AZURE_STORAGE_ACCOUNT_NAME=your-storage-account-name
+   AZURE_STORAGE_ACCOUNT_KEY=your-storage-account-key
+   AZURE_STORAGE_CONTAINER_NAME=files
+   ```
+
+   Replace:
+   - `your-storage-account-name` with your Azure Storage account name
+   - `your-storage-account-key` with your Azure Storage access key
+
+4. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**:
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Usage
+
+### Uploading Files
+
+1. **Drag and Drop**: Drag files from your computer directly into the upload area
+2. **Click to Upload**: Click the "Choose Files" button and select files from your computer
+3. **Multiple Files**: Upload multiple files at once
+
+### Managing Files
+
+- **Download**: Click the download icon (⬇️) on any file card
+- **Delete**: Click the delete icon (🗑️) to remove a file (confirmation required)
+- **Refresh**: Click the refresh button to reload the file list
+
+### File Information
+
+Each file displays:
+- File name
+- File size
+- Upload date and time
+- File type icon
+
+## Project Structure
+
+```
+share-cloud/
+├── lib/
+│   └── azureStorage.js      # Azure Blob Storage utility functions
+├── pages/
+│   ├── api/
+│   │   └── files/
+│   │       ├── upload.js    # File upload API endpoint
+│   │       ├── list.js      # List files API endpoint
+│   │       ├── download.js  # Download file API endpoint
+│   │       └── delete.js    # Delete file API endpoint
+│   ├── _app.js              # Next.js App component
+│   └── index.js             # Main application page
+├── styles/
+│   ├── globals.css          # Global styles
+│   └── Home.module.css      # Component-specific styles
+├── .env.local               # Environment variables (not in git)
+├── .env.example             # Environment variables template
+└── package.json             # Project dependencies
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API Endpoints
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+### POST `/api/files/upload`
+Upload one or more files to Azure Blob Storage.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+**Request**: Multipart form data with file(s)
+**Response**: `{ success: true, files: [...] }`
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+### GET `/api/files/list`
+List all files in the storage container.
 
-## Learn More
+**Response**: `{ success: true, files: [...] }`
 
-To learn more about Next.js, take a look at the following resources:
+### GET `/api/files/download?name=filename`
+Download a specific file.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Parameters**: `name` - The filename to download
+**Response**: File download stream
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### DELETE `/api/files/delete?name=filename`
+Delete a specific file.
 
-## Deploy on Vercel
+**Parameters**: `name` - The filename to delete
+**Response**: `{ success: true, name: "filename" }`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Docker Support
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The project includes Docker configuration for containerized deployment.
+
+### Build and Run with Docker
+
+```bash
+# Build the image
+docker build -t sharecloud .
+
+# Run the container
+docker run -p 3000:3000 \
+  -e AZURE_STORAGE_ACCOUNT_NAME=your-account-name \
+  -e AZURE_STORAGE_ACCOUNT_KEY=your-account-key \
+  -e AZURE_STORAGE_CONTAINER_NAME=files \
+  sharecloud
+```
+
+### Using Docker Compose
+
+```bash
+# Update docker-compose.yml with your Azure credentials
+# Then run:
+docker-compose up
+```
+
+## Configuration
+
+### File Size Limits
+
+Default maximum file size is **100MB**. To change this, edit `pages/api/files/upload.js`:
+
+```javascript
+const form = formidable({
+  maxFiles: 10,
+  maxFileSize: 100 * 1024 * 1024, // Change this value
+});
+```
+
+### Container Access Level
+
+By default, the container is created with public blob access. To change this, edit `lib/azureStorage.js`:
+
+```javascript
+await containerClient.createIfNotExists({
+  access: 'blob', // Options: 'blob', 'container', or 'private'
+});
+```
+
+## Security Considerations
+
+1. **Never commit `.env.local`**: Keep your Azure credentials secure
+2. **Use environment variables**: Always use environment variables for sensitive data
+3. **Access control**: Consider implementing authentication before deploying to production
+4. **CORS**: Configure CORS settings in Azure if accessing from different domains
+5. **Key rotation**: Regularly rotate your Azure Storage access keys
+
+## Troubleshooting
+
+### "Azure Storage credentials not configured" error
+
+Make sure your `.env.local` file exists and contains the correct credentials.
+
+### Files not uploading
+
+1. Check your Azure Storage account is active
+2. Verify your access key is correct
+3. Ensure the container exists or can be created
+4. Check file size limits
+
+### Connection errors
+
+1. Verify your internet connection
+2. Check Azure Storage account is accessible
+3. Ensure no firewall is blocking Azure endpoints
+
+## Development
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+### Linting
+
+```bash
+npm run lint
+```
+
+## Technologies Used
+
+- **Next.js 13** - React framework
+- **React 18** - UI library
+- **Azure Blob Storage** - Cloud file storage
+- **Formidable** - File upload handling
+- **Docker** - Containerization
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Support
+
+For issues and questions:
+- Check the [Azure Blob Storage documentation](https://docs.microsoft.com/en-us/azure/storage/blobs/)
+- Review the [Next.js documentation](https://nextjs.org/docs)
+- Open an issue in this repository
+
+## Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- Powered by [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/)
+- Inspired by Google Drive's user interface
