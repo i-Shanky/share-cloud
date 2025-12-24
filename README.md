@@ -231,6 +231,51 @@ Make sure your `.env.local` file exists and contains the correct credentials.
 2. Check Azure Storage account is accessible
 3. Ensure no firewall is blocking Azure endpoints
 
+## Deployment to Azure
+
+ShareCloud includes comprehensive deployment pipelines for Azure. Multiple deployment options are available:
+
+### Quick Deploy Options
+
+**Option 1: Azure App Service (Recommended for beginners)**
+```bash
+./azure/scripts/deploy-app-service.sh
+```
+
+**Option 2: Azure Container Apps (Recommended for scalability)**
+```bash
+./azure/scripts/deploy-container-apps.sh
+```
+
+### GitHub Actions CI/CD
+
+The project includes automated GitHub Actions workflows:
+
+- **azure-app-service.yml**: Deploys to Azure App Service on push to main
+- **azure-container-apps.yml**: Deploys to Azure Container Apps on push to main
+- **ci.yml**: Runs tests and builds on pull requests
+
+To set up GitHub Actions:
+
+1. Add the following secrets to your GitHub repository:
+   - `AZURE_CREDENTIALS`: Azure service principal credentials
+   - `AZURE_STORAGE_ACCOUNT_NAME`: Your storage account name
+   - `AZURE_STORAGE_ACCOUNT_KEY`: Your storage account key
+   - `AZURE_STORAGE_CONTAINER_NAME`: Container name (default: files)
+
+2. Update workflow environment variables in `.github/workflows/*.yml`
+
+3. Push to main branch to trigger deployment
+
+### Deployment Methods
+
+- **Automated Scripts**: One-command deployment with interactive prompts
+- **ARM Templates**: Infrastructure as Code for repeatable deployments
+- **Manual CLI**: Step-by-step Azure CLI commands
+- **GitHub Actions**: Automated CI/CD pipelines
+
+For detailed deployment instructions, monitoring, troubleshooting, and best practices, see **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
 ## Development
 
 ### Build for Production

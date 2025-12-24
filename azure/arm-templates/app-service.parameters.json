@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppName": {
+      "value": "sharecloud-app"
+    },
+    "sku": {
+      "value": "B1"
+    },
+    "nodeVersion": {
+      "value": "18-lts"
+    },
+    "azureStorageAccountName": {
+      "value": "YOUR_STORAGE_ACCOUNT_NAME"
+    },
+    "azureStorageAccountKey": {
+      "value": "YOUR_STORAGE_ACCOUNT_KEY"
+    },
+    "azureStorageContainerName": {
+      "value": "files"
+    }
+  }
+}
