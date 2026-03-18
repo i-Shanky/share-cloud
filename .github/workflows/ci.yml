@@ -32,9 +32,18 @@ jobs:
     - name: Build application
       run: npm run build
       env:
+        # Managed Identity — only account name needed, no key
         AZURE_STORAGE_ACCOUNT_NAME: dummy-account
-        AZURE_STORAGE_ACCOUNT_KEY: dummy-key
         AZURE_STORAGE_CONTAINER_NAME: files
+        AZURE_STORAGE_TRASH_CONTAINER_NAME: trash
+        # Azure AD — dummy values for build validation only
+        AZURE_AD_CLIENT_ID: 00000000-0000-0000-0000-000000000000
+        AZURE_AD_CLIENT_SECRET: dummy-secret
+        AZURE_AD_TENANT_ID: 00000000-0000-0000-0000-000000000000
+        # NextAuth
+        NEXTAUTH_SECRET: ci-build-secret-not-real
+        NEXTAUTH_URL: http://localhost:3000
+        CLEANUP_API_KEY: dummy-cleanup-key
 
     - name: Check build artifacts
       run: |
@@ -54,34 +63,37 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
+    - name: Build Docker image (no push)
       uses: docker/build-push-action@v5
       with:
         context: .
         push: false
-        tags: sharecloud-app:test
+        tags: sharecloud-app:ci-test
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Test Docker image
+    - name: Smoke-test container starts
       run: |
         docker run -d -p 3000:3000 \
           -e AZURE_STORAGE_ACCOUNT_NAME=dummy \
-          -e AZURE_STORAGE_ACCOUNT_KEY=dummy \
           -e AZURE_STORAGE_CONTAINER_NAME=files \
-          --name sharecloud-test \
-          sharecloud-app:test
+          -e AZURE_STORAGE_TRASH_CONTAINER_NAME=trash \
+          -e AZURE_AD_CLIENT_ID=00000000-0000-0000-0000-000000000000 \
+          -e AZURE_AD_CLIENT_SECRET=dummy \
+          -e AZURE_AD_TENANT_ID=00000000-0000-0000-0000-000000000000 \
+          -e NEXTAUTH_SECRET=ci-test-secret \
+          -e NEXTAUTH_URL=http://localhost:3000 \
+          -e CLEANUP_API_KEY=dummy \
+          --name sharecloud-ci-test \
+          sharecloud-app:ci-test
 
-        # Wait for container to start
         sleep 10
 
-        # Check if container is running
-        if [ "$(docker ps -q -f name=sharecloud-test)" ]; then
-          echo "Container is running successfully"
-          docker stop sharecloud-test
-          exit 0
+        if [ "$(docker ps -q -f name=sharecloud-ci-test)" ]; then
+          echo "Container started successfully"
+          docker stop sharecloud-ci-test
         else
           echo "Container failed to start"
-          docker logs sharecloud-test
+          docker logs sharecloud-ci-test
           exit 1
         fi

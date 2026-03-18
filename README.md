@@ -268,10 +268,31 @@ The project includes automated GitHub Actions workflows:
 To set up GitHub Actions:
 
 1. Add the following secrets to your GitHub repository:
-   - `AZURE_CREDENTIALS`: Azure service principal credentials
-   - `AZURE_STORAGE_ACCOUNT_NAME`: Your storage account name
-   - `AZURE_STORAGE_ACCOUNT_KEY`: Your storage account key
-   - `AZURE_STORAGE_CONTAINER_NAME`: Container name (default: files)
+
+   **Azure OIDC (replaces `AZURE_CREDENTIALS`):**
+   - `AZURE_CLIENT_ID`: App registration client ID (for federated OIDC)
+   - `AZURE_TENANT_ID`: Azure tenant ID
+   - `AZURE_SUBSCRIPTION_ID`: Azure subscription ID
+
+   **Storage (Managed Identity — no key needed):**
+   - `AZURE_STORAGE_ACCOUNT_NAME`: Storage account name
+   - `AZURE_STORAGE_CONTAINER_NAME`: e.g. `files`
+   - `AZURE_STORAGE_TRASH_CONTAINER_NAME`: e.g. `trash`
+
+   **Azure AD authentication:**
+   - `AZURE_AD_CLIENT_ID`: App registration client ID
+   - `AZURE_AD_CLIENT_SECRET`: App registration client secret
+   - `AZURE_AD_TENANT_ID`: Tenant ID
+
+   **NextAuth:**
+   - `NEXTAUTH_SECRET`: Random string (`openssl rand -base64 32`)
+   - `NEXTAUTH_URL`: Public app URL
+
+   **Misc:**
+   - `CLEANUP_API_KEY`: Secret key protecting `/api/trash/cleanup`
+
+   For Container Apps, additionally:
+   - `ACR_NAME` set in workflow env (no separate secret — Managed Identity handles pull)
 
 2. Update workflow environment variables in `.github/workflows/*.yml`
 
