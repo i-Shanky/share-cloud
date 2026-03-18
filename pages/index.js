@@ -16,16 +16,7 @@ export default function Home() {
 
   const isAuthenticated = status === 'authenticated';
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadFiles();
-      if (activeTab === 'trash') {
-        loadTrash();
-      }
-    }
-  }, [isAuthenticated]);
-
-  const loadFiles = async () => {
+  const loadFiles = useCallback(async () => {
     if (!isAuthenticated) return;
     setLoading(true);
     setError('');
@@ -43,9 +34,9 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAuthenticated]);
 
-  const loadTrash = async () => {
+  const loadTrash = useCallback(async () => {
     if (!isAuthenticated) return;
     setLoading(true);
     setError('');
@@ -63,9 +54,18 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAuthenticated]);
 
-  const handleUpload = async (fileList) => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadFiles();
+      if (activeTab === 'trash') {
+        loadTrash();
+      }
+    }
+  }, [isAuthenticated, activeTab, loadFiles, loadTrash]);
+
+  const handleUpload = useCallback(async (fileList) => {
     if (!fileList || fileList.length === 0) return;
     if (!isAuthenticated) {
       setError('Please sign in to upload files');
@@ -97,7 +97,7 @@ export default function Home() {
     } finally {
       setUploading(false);
     }
-  };
+  }, [isAuthenticated, loadFiles]);
 
   const handleDelete = async (fileName) => {
     if (!confirm(`Move "${fileName}" to trash?`)) return;
@@ -188,7 +188,7 @@ export default function Home() {
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleUpload(e.dataTransfer.files);
     }
-  }, [isAuthenticated]);
+  }, [handleUpload]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
