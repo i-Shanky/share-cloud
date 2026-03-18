@@ -8,23 +8,50 @@
     "containerRegistryName": {
       "value": "YOUR_ACR_NAME"
     },
-    "containerRegistryUsername": {
-      "value": "YOUR_ACR_USERNAME"
-    },
-    "containerRegistryPassword": {
-      "value": "YOUR_ACR_PASSWORD"
-    },
     "containerImage": {
       "value": "sharecloud-app:latest"
     },
     "azureStorageAccountName": {
       "value": "YOUR_STORAGE_ACCOUNT_NAME"
     },
-    "azureStorageAccountKey": {
-      "value": "YOUR_STORAGE_ACCOUNT_KEY"
-    },
     "azureStorageContainerName": {
       "value": "files"
+    },
+    "azureStorageTrashContainerName": {
+      "value": "trash"
+    },
+    "azureAdClientId": {
+      "value": "YOUR_AZURE_AD_CLIENT_ID"
+    },
+    "azureAdClientSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/YOUR_SUBSCRIPTION_ID/resourceGroups/YOUR_RG/providers/Microsoft.KeyVault/vaults/YOUR_KEYVAULT"
+        },
+        "secretName": "azure-ad-client-secret"
+      }
+    },
+    "azureAdTenantId": {
+      "value": "YOUR_AZURE_AD_TENANT_ID"
+    },
+    "nextAuthSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/YOUR_SUBSCRIPTION_ID/resourceGroups/YOUR_RG/providers/Microsoft.KeyVault/vaults/YOUR_KEYVAULT"
+        },
+        "secretName": "nextauth-secret"
+      }
+    },
+    "nextAuthUrl": {
+      "value": "https://YOUR_CONTAINER_APP_FQDN"
+    },
+    "cleanupApiKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/YOUR_SUBSCRIPTION_ID/resourceGroups/YOUR_RG/providers/Microsoft.KeyVault/vaults/YOUR_KEYVAULT"
+        },
+        "secretName": "cleanup-api-key"
+      }
     },
     "minReplicas": {
       "value": 1

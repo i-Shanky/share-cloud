@@ -5,68 +5,67 @@
     "webAppName": {
       "type": "string",
       "defaultValue": "sharecloud-app",
-      "minLength": 2,
-      "metadata": {
-        "description": "Web app name."
-      }
+      "metadata": { "description": "Web app name." }
     },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "Location for all resources."
-      }
+      "metadata": { "description": "Location for all resources." }
     },
     "sku": {
       "type": "string",
       "defaultValue": "B1",
-      "allowedValues": [
-        "F1",
-        "D1",
-        "B1",
-        "B2",
-        "B3",
-        "S1",
-        "S2",
-        "S3",
-        "P1",
-        "P2",
-        "P3"
-      ],
-      "metadata": {
-        "description": "The SKU of App Service Plan."
-      }
-    },
-    "nodeVersion": {
-      "type": "string",
-      "defaultValue": "18-lts",
-      "metadata": {
-        "description": "The Node.js version."
-      }
+      "allowedValues": ["F1", "D1", "B1", "B2", "B3", "S1", "S2", "S3", "P1", "P2", "P3"],
+      "metadata": { "description": "App Service Plan SKU." }
     },
     "azureStorageAccountName": {
       "type": "string",
-      "metadata": {
-        "description": "Azure Storage Account Name"
-      }
-    },
-    "azureStorageAccountKey": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Azure Storage Account Key"
-      }
+      "metadata": { "description": "Azure Storage Account Name." }
     },
     "azureStorageContainerName": {
       "type": "string",
       "defaultValue": "files",
-      "metadata": {
-        "description": "Azure Storage Container Name"
-      }
+      "metadata": { "description": "Blob container for user files." }
+    },
+    "azureStorageTrashContainerName": {
+      "type": "string",
+      "defaultValue": "trash",
+      "metadata": { "description": "Blob container for trashed files." }
+    },
+    "azureAdClientId": {
+      "type": "string",
+      "metadata": { "description": "Azure AD App Registration client ID." }
+    },
+    "azureAdClientSecret": {
+      "type": "securestring",
+      "metadata": { "description": "Azure AD App Registration client secret." }
+    },
+    "azureAdTenantId": {
+      "type": "string",
+      "metadata": { "description": "Azure AD tenant ID." }
+    },
+    "nextAuthSecret": {
+      "type": "securestring",
+      "metadata": { "description": "NextAuth.js secret (openssl rand -base64 32)." }
+    },
+    "nextAuthUrl": {
+      "type": "string",
+      "metadata": { "description": "Public URL of the deployed app (for NextAuth callbacks)." }
+    },
+    "cleanupApiKey": {
+      "type": "securestring",
+      "metadata": { "description": "API key to protect the /api/trash/cleanup endpoint." }
+    },
+    "storageAccountResourceGroup": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": { "description": "Resource group containing the storage account (defaults to same RG)." }
     }
   },
   "variables": {
     "appServicePlanName": "[concat(parameters('webAppName'), '-plan')]",
-    "webAppPortalName": "[concat(parameters('webAppName'), '-', uniqueString(resourceGroup().id))]"
+    "webAppPortalName": "[concat(parameters('webAppName'), '-', uniqueString(resourceGroup().id))]",
+    "storageBlobDataContributorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]"
   },
   "resources": [
     {
@@ -74,52 +73,56 @@
       "apiVersion": "2022-03-01",
       "name": "[variables('appServicePlanName')]",
       "location": "[parameters('location')]",
-      "sku": {
-        "name": "[parameters('sku')]"
-      },
+      "sku": { "name": "[parameters('sku')]" },
       "kind": "linux",
-      "properties": {
-        "reserved": true
-      }
+      "properties": { "reserved": true }
     },
     {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2022-03-01",
       "name": "[variables('webAppPortalName')]",
       "location": "[parameters('location')]",
+      "kind": "app,linux",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
       ],
-      "kind": "app,linux",
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "httpsOnly": true,
         "siteConfig": {
-          "linuxFxVersion": "[concat('NODE|', parameters('nodeVersion'))]",
+          "linuxFxVersion": "NODE|18-lts",
+          "appCommandLine": "npm start",
           "appSettings": [
-            {
-              "name": "WEBSITE_NODE_DEFAULT_VERSION",
-              "value": "~18"
-            },
-            {
-              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
-              "value": "true"
-            },
-            {
-              "name": "AZURE_STORAGE_ACCOUNT_NAME",
-              "value": "[parameters('azureStorageAccountName')]"
-            },
-            {
-              "name": "AZURE_STORAGE_ACCOUNT_KEY",
-              "value": "[parameters('azureStorageAccountKey')]"
-            },
-            {
-              "name": "AZURE_STORAGE_CONTAINER_NAME",
-              "value": "[parameters('azureStorageContainerName')]"
-            }
-          ],
-          "appCommandLine": "npm start"
-        },
-        "httpsOnly": true
+            { "name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "~18" },
+            { "name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "true" },
+            { "name": "AZURE_STORAGE_ACCOUNT_NAME",           "value": "[parameters('azureStorageAccountName')]" },
+            { "name": "AZURE_STORAGE_CONTAINER_NAME",         "value": "[parameters('azureStorageContainerName')]" },
+            { "name": "AZURE_STORAGE_TRASH_CONTAINER_NAME",   "value": "[parameters('azureStorageTrashContainerName')]" },
+            { "name": "AZURE_AD_CLIENT_ID",                   "value": "[parameters('azureAdClientId')]" },
+            { "name": "AZURE_AD_CLIENT_SECRET",               "value": "[parameters('azureAdClientSecret')]" },
+            { "name": "AZURE_AD_TENANT_ID",                   "value": "[parameters('azureAdTenantId')]" },
+            { "name": "NEXTAUTH_SECRET",                      "value": "[parameters('nextAuthSecret')]" },
+            { "name": "NEXTAUTH_URL",                         "value": "[parameters('nextAuthUrl')]" },
+            { "name": "CLEANUP_API_KEY",                      "value": "[parameters('cleanupApiKey')]" }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(variables('webAppPortalName'), 'StorageBlobDataContributor')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts/', parameters('azureStorageAccountName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('webAppPortalName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('storageBlobDataContributorRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('webAppPortalName')), '2022-03-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
       }
     }
   ],
@@ -131,6 +134,10 @@
     "webAppName": {
       "type": "string",
       "value": "[variables('webAppPortalName')]"
+    },
+    "managedIdentityPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppPortalName')), '2022-03-01', 'Full').identity.principalId]"
     }
   }
 }

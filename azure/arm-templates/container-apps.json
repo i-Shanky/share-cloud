@@ -5,79 +5,76 @@
     "containerAppName": {
       "type": "string",
       "defaultValue": "sharecloud-container",
-      "metadata": {
-        "description": "Container App name."
-      }
+      "metadata": { "description": "Container App name." }
     },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "Location for all resources."
-      }
+      "metadata": { "description": "Location for all resources." }
     },
     "containerRegistryName": {
       "type": "string",
-      "metadata": {
-        "description": "Azure Container Registry name."
-      }
-    },
-    "containerRegistryUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "Container Registry username."
-      }
-    },
-    "containerRegistryPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Container Registry password."
-      }
+      "metadata": { "description": "Azure Container Registry name." }
     },
     "containerImage": {
       "type": "string",
       "defaultValue": "sharecloud-app:latest",
-      "metadata": {
-        "description": "Container image to deploy."
-      }
+      "metadata": { "description": "Container image to deploy." }
     },
     "azureStorageAccountName": {
       "type": "string",
-      "metadata": {
-        "description": "Azure Storage Account Name"
-      }
-    },
-    "azureStorageAccountKey": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Azure Storage Account Key"
-      }
+      "metadata": { "description": "Azure Storage Account Name." }
     },
     "azureStorageContainerName": {
       "type": "string",
       "defaultValue": "files",
-      "metadata": {
-        "description": "Azure Storage Container Name"
-      }
+      "metadata": { "description": "Blob container for user files." }
+    },
+    "azureStorageTrashContainerName": {
+      "type": "string",
+      "defaultValue": "trash",
+      "metadata": { "description": "Blob container for trashed files." }
+    },
+    "azureAdClientId": {
+      "type": "string",
+      "metadata": { "description": "Azure AD App Registration client ID." }
+    },
+    "azureAdClientSecret": {
+      "type": "securestring",
+      "metadata": { "description": "Azure AD App Registration client secret." }
+    },
+    "azureAdTenantId": {
+      "type": "string",
+      "metadata": { "description": "Azure AD tenant ID." }
+    },
+    "nextAuthSecret": {
+      "type": "securestring",
+      "metadata": { "description": "NextAuth.js secret." }
+    },
+    "nextAuthUrl": {
+      "type": "string",
+      "metadata": { "description": "Public URL of the deployed app." }
+    },
+    "cleanupApiKey": {
+      "type": "securestring",
+      "metadata": { "description": "API key for /api/trash/cleanup." }
     },
     "minReplicas": {
       "type": "int",
       "defaultValue": 1,
-      "metadata": {
-        "description": "Minimum number of replicas"
-      }
+      "metadata": { "description": "Minimum number of replicas." }
     },
     "maxReplicas": {
       "type": "int",
       "defaultValue": 3,
-      "metadata": {
-        "description": "Maximum number of replicas"
-      }
+      "metadata": { "description": "Maximum number of replicas." }
     }
   },
   "variables": {
     "environmentName": "[concat(parameters('containerAppName'), '-env')]",
-    "workspaceName": "[concat(parameters('containerAppName'), '-logs')]"
+    "workspaceName": "[concat(parameters('containerAppName'), '-logs')]",
+    "acrPullRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]",
+    "storageBlobDataContributorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]"
   },
   "resources": [
     {
@@ -86,9 +83,7 @@
       "name": "[variables('workspaceName')]",
       "location": "[parameters('location')]",
       "properties": {
-        "sku": {
-          "name": "PerGB2018"
-        },
+        "sku": { "name": "PerGB2018" },
         "retentionInDays": 30
       }
     },
@@ -115,6 +110,9 @@
       "apiVersion": "2023-05-01",
       "name": "[parameters('containerAppName')]",
       "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "dependsOn": [
         "[resourceId('Microsoft.App/managedEnvironments', variables('environmentName'))]"
       ],
@@ -125,37 +123,24 @@
             "external": true,
             "targetPort": 3000,
             "allowInsecure": false,
-            "traffic": [
-              {
-                "latestRevision": true,
-                "weight": 100
-              }
-            ]
+            "traffic": [{ "latestRevision": true, "weight": 100 }]
           },
           "registries": [
             {
               "server": "[concat(parameters('containerRegistryName'), '.azurecr.io')]",
-              "username": "[parameters('containerRegistryUsername')]",
-              "passwordSecretRef": "registry-password"
+              "identity": "system"
             }
           ],
           "secrets": [
-            {
-              "name": "registry-password",
-              "value": "[parameters('containerRegistryPassword')]"
-            },
-            {
-              "name": "azure-storage-account-name",
-              "value": "[parameters('azureStorageAccountName')]"
-            },
-            {
-              "name": "azure-storage-account-key",
-              "value": "[parameters('azureStorageAccountKey')]"
-            },
-            {
-              "name": "azure-storage-container-name",
-              "value": "[parameters('azureStorageContainerName')]"
-            }
+            { "name": "azure-storage-account-name",         "value": "[parameters('azureStorageAccountName')]" },
+            { "name": "azure-storage-container-name",       "value": "[parameters('azureStorageContainerName')]" },
+            { "name": "azure-storage-trash-container-name", "value": "[parameters('azureStorageTrashContainerName')]" },
+            { "name": "azure-ad-client-id",                 "value": "[parameters('azureAdClientId')]" },
+            { "name": "azure-ad-client-secret",             "value": "[parameters('azureAdClientSecret')]" },
+            { "name": "azure-ad-tenant-id",                 "value": "[parameters('azureAdTenantId')]" },
+            { "name": "nextauth-secret",                    "value": "[parameters('nextAuthSecret')]" },
+            { "name": "nextauth-url",                       "value": "[parameters('nextAuthUrl')]" },
+            { "name": "cleanup-api-key",                    "value": "[parameters('cleanupApiKey')]" }
           ]
         },
         "template": {
@@ -163,23 +148,17 @@
             {
               "name": "sharecloud",
               "image": "[concat(parameters('containerRegistryName'), '.azurecr.io/', parameters('containerImage'))]",
-              "resources": {
-                "cpu": 0.5,
-                "memory": "1Gi"
-              },
+              "resources": { "cpu": 0.5, "memory": "1Gi" },
               "env": [
-                {
-                  "name": "AZURE_STORAGE_ACCOUNT_NAME",
-                  "secretRef": "azure-storage-account-name"
-                },
-                {
-                  "name": "AZURE_STORAGE_ACCOUNT_KEY",
-                  "secretRef": "azure-storage-account-key"
-                },
-                {
-                  "name": "AZURE_STORAGE_CONTAINER_NAME",
-                  "secretRef": "azure-storage-container-name"
-                }
+                { "name": "AZURE_STORAGE_ACCOUNT_NAME",         "secretRef": "azure-storage-account-name" },
+                { "name": "AZURE_STORAGE_CONTAINER_NAME",       "secretRef": "azure-storage-container-name" },
+                { "name": "AZURE_STORAGE_TRASH_CONTAINER_NAME", "secretRef": "azure-storage-trash-container-name" },
+                { "name": "AZURE_AD_CLIENT_ID",                 "secretRef": "azure-ad-client-id" },
+                { "name": "AZURE_AD_CLIENT_SECRET",             "secretRef": "azure-ad-client-secret" },
+                { "name": "AZURE_AD_TENANT_ID",                 "secretRef": "azure-ad-tenant-id" },
+                { "name": "NEXTAUTH_SECRET",                    "secretRef": "nextauth-secret" },
+                { "name": "NEXTAUTH_URL",                       "secretRef": "nextauth-url" },
+                { "name": "CLEANUP_API_KEY",                    "secretRef": "cleanup-api-key" }
               ]
             }
           ],
@@ -189,15 +168,39 @@
             "rules": [
               {
                 "name": "http-scaling",
-                "http": {
-                  "metadata": {
-                    "concurrentRequests": "10"
-                  }
-                }
+                "http": { "metadata": { "concurrentRequests": "10" } }
               }
             ]
           }
         }
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(parameters('containerAppName'), 'StorageBlobDataContributor')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts/', parameters('azureStorageAccountName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/containerApps', parameters('containerAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('storageBlobDataContributorRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.App/containerApps', parameters('containerAppName')), '2023-05-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(parameters('containerAppName'), 'AcrPull')]",
+      "scope": "[concat('Microsoft.ContainerRegistry/registries/', parameters('containerRegistryName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/containerApps', parameters('containerAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('acrPullRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.App/containerApps', parameters('containerAppName')), '2023-05-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
       }
     }
   ],
@@ -206,9 +209,9 @@
       "type": "string",
       "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', parameters('containerAppName'))).configuration.ingress.fqdn)]"
     },
-    "containerAppName": {
+    "managedIdentityPrincipalId": {
       "type": "string",
-      "value": "[parameters('containerAppName')]"
+      "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('containerAppName')), '2023-05-01', 'Full').identity.principalId]"
     }
   }
 }
