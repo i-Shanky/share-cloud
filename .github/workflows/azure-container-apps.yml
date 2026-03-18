@@ -15,6 +15,8 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    # Skip if secrets are not configured
+    if: ${{ secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_TENANT_ID != '' && secrets.AZURE_SUBSCRIPTION_ID != '' }}
 
     permissions:
       id-token: write   # Required for OIDC login
@@ -51,6 +53,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-push
+    # Skip if secrets are not configured
+    if: ${{ secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_TENANT_ID != '' && secrets.AZURE_SUBSCRIPTION_ID != '' }}
 
     permissions:
       id-token: write
@@ -102,6 +106,7 @@ jobs:
             azure-ad-tenant-id="${{ secrets.AZURE_AD_TENANT_ID }}" \
             nextauth-secret="${{ secrets.NEXTAUTH_SECRET }}" \
             nextauth-url="${{ secrets.NEXTAUTH_URL }}" \
+            nextauth-url-internal="${{ secrets.NEXTAUTH_URL }}" \
             cleanup-api-key="${{ secrets.CLEANUP_API_KEY }}"
 
     - name: Deploy new image to Container App
@@ -119,6 +124,7 @@ jobs:
           AZURE_AD_TENANT_ID=secretref:azure-ad-tenant-id
           NEXTAUTH_SECRET=secretref:nextauth-secret
           NEXTAUTH_URL=secretref:nextauth-url
+          NEXTAUTH_URL_INTERNAL=secretref:nextauth-url-internal
           CLEANUP_API_KEY=secretref:cleanup-api-key
 
     - name: Logout from Azure
