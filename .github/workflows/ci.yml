@@ -33,17 +33,18 @@ jobs:
       run: npm run build
       env:
         # Managed Identity — only account name needed, no key
-        AZURE_STORAGE_ACCOUNT_NAME: dummy-account
-        AZURE_STORAGE_CONTAINER_NAME: files
-        AZURE_STORAGE_TRASH_CONTAINER_NAME: trash
+        AZURE_STORAGE_ACCOUNT_NAME: "dummy-account"
+        AZURE_STORAGE_CONTAINER_NAME: "files"
+        AZURE_STORAGE_TRASH_CONTAINER_NAME: "trash"
         # Azure AD — dummy values for build validation only
-        AZURE_AD_CLIENT_ID: 00000000-0000-0000-0000-000000000000
-        AZURE_AD_CLIENT_SECRET: dummy-secret
-        AZURE_AD_TENANT_ID: 00000000-0000-0000-0000-000000000000
+        AZURE_AD_CLIENT_ID: "00000000-0000-0000-0000-000000000000"
+        AZURE_AD_CLIENT_SECRET: "dummy-secret"
+        AZURE_AD_TENANT_ID: "00000000-0000-0000-0000-000000000000"
         # NextAuth
-        NEXTAUTH_SECRET: ci-build-secret-not-real
-        NEXTAUTH_URL: http://localhost:3000
-        CLEANUP_API_KEY: dummy-cleanup-key
+        NEXTAUTH_SECRET: "ci-build-secret-not-real"
+        NEXTAUTH_URL: "http://localhost:3000"
+        NEXTAUTH_URL_INTERNAL: "http://localhost:3000"
+        CLEANUP_API_KEY: "dummy-cleanup-key"
 
     - name: Check build artifacts
       run: |
@@ -84,6 +85,7 @@ jobs:
           -e AZURE_AD_TENANT_ID=00000000-0000-0000-0000-000000000000 \
           -e NEXTAUTH_SECRET=ci-test-secret \
           -e NEXTAUTH_URL=http://localhost:3000 \
+          -e NEXTAUTH_URL_INTERNAL=http://localhost:3000 \
           -e CLEANUP_API_KEY=dummy \
           --name sharecloud-ci-test \
           sharecloud-app:ci-test
